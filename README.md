@@ -21,7 +21,7 @@ If you find this useful, please cite our paper as:
 
 ## Requirements
 
-`pip3 install pytorch-transformers`
+`pip3 install transformers`
 
 
 ## Generation (toy example)
