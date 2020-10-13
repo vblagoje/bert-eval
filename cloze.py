@@ -222,8 +222,6 @@ if __name__ == "__main__":
     argparser.add_argument('--tokenizer', type=str,
                            help='HF model')
 
-    argparser.add_argument('--lowercase', default=False, action="store_true", help='Lowercase text (Default: False)')
-
     argparser.add_argument('--test_sentences', required=True, type=str,
                            help='File with test sentences one sentence per line (untokenized raw text).')
     argparser.add_argument('--min_len', default=5, type=int,
