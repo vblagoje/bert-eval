@@ -8,7 +8,7 @@ from transformers import AutoTokenizer, AutoModelForMaskedLM
 
 class BertGeneration(object):
 
-    def __init__(self, model_name):
+    def __init__(self, model_name, tokenizer):
 
         # Load pre-trained model (weights)
 
@@ -19,7 +19,10 @@ class BertGeneration(object):
             self.model = self.model.cuda()
 
         # Load pre-trained model tokenizer (vocabulary)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        if tokenizer:
+            self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         self.CLS = '[CLS]'
         self.SEP = '[SEP]'
@@ -193,7 +196,7 @@ def main(args):
     total_subwords = 0
 
     dataset = DataMangler(args.test_sentences, args.min_len, args.max_len, args.max_sentences)
-    bert_model = BertGeneration(args.model)
+    bert_model = BertGeneration(args.model, args.tokenizer)
 
     for correct_, total_, prediction_ in dataset.predict_iterator(bert_model):
 
@@ -216,6 +219,9 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description='')
     argparser.add_argument('--model', required=True, type=str,
                            help='HF model')
+    argparser.add_argument('--tokenizer', type=str,
+                           help='HF model')
+
     argparser.add_argument('--lowercase', default=False, action="store_true", help='Lowercase text (Default: False)')
 
     argparser.add_argument('--test_sentences', required=True, type=str,
