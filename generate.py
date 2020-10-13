@@ -5,23 +5,22 @@ import time
 
 import numpy as np
 import torch
-from transformers import BertTokenizer, BertForMaskedLM
+from transformers import AutoModelForMaskedLM, AutoTokenizer
 
 
 class BertGeneration(object):
 
-    def __init__(self, model_directory, vocab_file, lower=False):
+    def __init__(self, model_name_or_path):
 
         # Load pre-trained model (weights)
 
-        self.model = BertForMaskedLM.from_pretrained(model_directory)
+        self.model = AutoModelForMaskedLM.from_pretrained(model_name_or_path)
         self.model.eval()
         self.cuda = torch.cuda.is_available()
         if self.cuda:
             self.model = self.model.cuda()
 
-        # Load pre-trained model tokenizer (vocabulary)
-        self.tokenizer = BertTokenizer(vocab_file=vocab_file, do_lower_case=lower)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
         self.CLS = '[CLS]'
         self.SEP = '[SEP]'
@@ -221,7 +220,7 @@ def main(args):
     sample = True
     max_iter = 500
 
-    model = BertGeneration(args.model_directory, args.vocab_file, args.lowercase)
+    model = BertGeneration(args.model_directory)
 
     while True:
 
@@ -247,8 +246,6 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description='')
     argparser.add_argument('--model_directory', required=True, type=str,
                            help='Directory with pytorch_model.bin and config.yaml')
-    argparser.add_argument('--vocab_file', required=True, type=str, help='Name of the vocabulary file.')
-    argparser.add_argument('--lowercase', default=False, action="store_true", help='Lowercase text (Default: False)')
     argparser.add_argument('--mode', default="parallel-sequential",
                            choices=["parallel-sequential", "sequential", "parallel"], help='Generation mode')
     argparser.add_argument('--mask_len', default=30, type=int, help='How many subwords to generate after seed text.')
