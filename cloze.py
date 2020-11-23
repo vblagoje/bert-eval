@@ -1,4 +1,6 @@
 import copy
+import glob
+import os
 import random
 import sys
 
@@ -194,23 +196,32 @@ class DataMangler(object):
 def main(args):
     correct_subwords = 0
     total_subwords = 0
+    total_accuracy = 0
 
-    dataset = DataMangler(args.test_sentences, args.min_len, args.max_len, args.max_sentences)
+    print(f"Loading language model from {args.model}")
     bert_model = BertGeneration(args.model, args.tokenizer)
 
-    for correct_, total_, prediction_ in dataset.predict_iterator(bert_model):
+    target_files = os.path.join(args.input_dir, "*.txt")
+    input_files = glob.glob(target_files)
+    print(f"In {args.input_dir} there are {len(input_files)} input files for masked prediction")
 
-        correct_subwords += correct_
-        total_subwords += total_
+    for input_file in sorted(input_files):
+        print(f"Loading {input_file} for masked language prediction...")
+        dataset = DataMangler(input_file, args.min_len, args.max_len, args.max_sentences)
+        for correct_, total_, prediction_ in dataset.predict_iterator(bert_model):
 
-        if args.verbose:
-            print("Input:", prediction_[0], file=sys.stdout)
-            print("Orig:", prediction_[1], file=sys.stdout)
-            print("Pred:", prediction_[2], file=sys.stdout)
-            print(file=sys.stdout)
+            correct_subwords += correct_
+            total_subwords += total_
 
-    print("Correct:", correct_subwords, "Total:", total_subwords, "Accuracy:",
-          (correct_subwords / total_subwords) * 100, file=sys.stderr)
+            if args.verbose:
+                print("Input:", prediction_[0], file=sys.stdout)
+                print("Orig:", prediction_[1], file=sys.stdout)
+                print("Pred:", prediction_[2], file=sys.stdout)
+                print(file=sys.stdout)
+        accuracy = correct_subwords / total_subwords
+        print("Correct:", correct_subwords, "Total:", total_subwords, "Accuracy:", accuracy * 100)
+        total_accuracy += accuracy
+    print("Final accuracy:", total_accuracy / len(input_files))
 
 
 if __name__ == "__main__":
@@ -221,9 +232,8 @@ if __name__ == "__main__":
                            help='HF model')
     argparser.add_argument('--tokenizer', type=str,
                            help='HF model')
-
-    argparser.add_argument('--test_sentences', required=True, type=str,
-                           help='File with test sentences one sentence per line (untokenized raw text).')
+    argparser.add_argument('--input_dir', required=True, type=str,
+                           help='Directory with *.txt input files used for masking and prediction.')
     argparser.add_argument('--min_len', default=5, type=int,
                            help='Minumum sentence length used in evaluation (Default: 5 tokens, as counted with whitespace tokenizer)')
     argparser.add_argument('--max_len', default=50, type=int,
