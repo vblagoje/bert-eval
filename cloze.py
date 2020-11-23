@@ -229,15 +229,15 @@ if __name__ == "__main__":
 
     argparser = argparse.ArgumentParser(description='')
     argparser.add_argument('--model', required=True, type=str,
-                           help='HF model')
+                           help='HuggingFace model (either local dir or remote model URL)')
     argparser.add_argument('--tokenizer', type=str,
-                           help='HF model')
-    argparser.add_argument('--input_dir', required=True, type=str,
+                           help='HuggingFace model tokenizer')
+    argparser.add_argument('--input_dir', required=False, type=str, default='./data/',
                            help='Directory with *.txt input files used for masking and prediction.')
     argparser.add_argument('--min_len', default=5, type=int,
-                           help='Minumum sentence length used in evaluation (Default: 5 tokens, as counted with whitespace tokenizer)')
+                           help='Minumum sentence length used in evaluation')
     argparser.add_argument('--max_len', default=50, type=int,
-                           help='Maximum sentence length used in evalaution (Default: 50 tokens, as counted with whitespace tokenizer)')
+                           help='Maximum sentence length used in evaluation')
     argparser.add_argument('--max_sentences', default=0, type=int,
                            help='How many sentences to use in evaluation (Default: 0, use all))')
     argparser.add_argument('--verbose', default=False, action="store_true",
